@@ -13,17 +13,17 @@ import javax.swing.text.BadLocationException;
  * @author Rian De Rous
  */
 public class HTMLEditor extends javax.swing.JFrame {
-   Stack<String> undo = new StackLL<>();
-   Stack<String> redo = new StackLL<>();
-   
+
+   UndoRedo ur = new UndoRedo(50);
+
     /**
      * Creates new form HTMLEditor
      */
     public HTMLEditor() {
 
         initComponents();
-        undo.push("");
-        undo.push(htmlEditor.getText());
+        ur.addStep("");
+        ur.addStep(htmlEditor.getText());
     }
 
     /**
@@ -110,8 +110,12 @@ public class HTMLEditor extends javax.swing.JFrame {
     }//GEN-LAST:event_htmlEditorKeyTyped
 
     private void htmlEditorKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_htmlEditorKeyReleased
-         undo.push(htmlEditor.getText());
-         undoButton.setEnabled(true);
+       
+       // if(evt.getKeyChar() == '\t' || evt.getKeyChar() == ' '){
+            ur.addStep(htmlEditor.getText());
+       // }
+        
+        undoButton.setEnabled(true);
         if (evt.getKeyChar() == '<') {
             tagStartCaret = htmlEditor.getCaretPosition() - 1;
             isATag = true;
@@ -143,17 +147,16 @@ public class HTMLEditor extends javax.swing.JFrame {
         boolean succes = true;
         int line = 1;
         int col = 0;
-        
+
         for (int i = 0; i < length; i++) {
-        
-            if(document.charAt(i)=='\n'){
-              line++;
-              col = 0;
-            }
-            else{
+
+            if (document.charAt(i) == '\n') {
+                line++;
+                col = 0;
+            } else {
                 col++;
             }
-            
+
             if (document.charAt(i) == '<' && document.charAt(i + 1) != '/') {
                 tagStartIndex = i;
                 tagType = true;
@@ -169,7 +172,7 @@ public class HTMLEditor extends javax.swing.JFrame {
             if (document.charAt(i) == '>' && tagType) {
                 String tag1 = document.substring(tagStartIndex, i + 1);
                 st.push(tag1);
-               // System.out.println("found tag: " + tag1 + " from index " + tagStartIndex + " to " + i);
+                // System.out.println("found tag: " + tag1 + " from index " + tagStartIndex + " to " + i);
             }
 
             if (document.charAt(i) == '>' && !tagType) {
@@ -181,9 +184,8 @@ public class HTMLEditor extends javax.swing.JFrame {
                     if (st.top().equals("<" + tag1.substring(2))) {
                         st.pop();
                         //System.out.println("found closing tag: " + tag1 + "from index" + tagStartIndex + "to " + i);
-                    }
-                    else{
-                        System.out.println("incorrect closing tag " + tag1 + " expected </" + st.top().toString().substring(1) +"at" + line + "," + col);
+                    } else {
+                        System.out.println("incorrect closing tag " + tag1 + " expected </" + st.top().toString().substring(1) + "at" + line + "," + col);
                         succes = false;
                     }
                 }
@@ -201,14 +203,10 @@ public class HTMLEditor extends javax.swing.JFrame {
 
     private void undoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_undoButtonActionPerformed
         redoButton.setEnabled(true);
-        if(!undo.isEmpty()){
-        undoButton.setEnabled(true);
-        redo.push(undo.top());
-        htmlEditor.setText(undo.pop());
-           
-        
-        
-        }else{
+        if (!ur.undoIsEmpty()) {
+            undoButton.setEnabled(true);
+            htmlEditor.setText((String)ur.undo());
+        } else {
             undoButton.setEnabled(false);
         }
 
@@ -216,14 +214,11 @@ public class HTMLEditor extends javax.swing.JFrame {
     }//GEN-LAST:event_undoButtonActionPerformed
 
     private void redoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_redoButtonActionPerformed
-            if(redo.size()>1){
-        redoButton.setEnabled(true);
-        undo.push(redo.top());
-        htmlEditor.setText(redo.pop());
-           
-        
-        
-        }else{
+        if (ur.redoIsEmpty()) {
+            redoButton.setEnabled(true);
+            htmlEditor.setText((String)ur.redo());
+
+        } else {
             redoButton.setEnabled(false);
         }  // TODO add your handling code here:
     }//GEN-LAST:event_redoButtonActionPerformed
