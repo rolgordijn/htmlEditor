@@ -1,8 +1,8 @@
-# htmlEditor
-
-**functionality**
+# HTML Editor 
 
 This is code for a school assignment. It's a very basic editor for HTML. 
+
+**functionality**
 
 * Add closing tag when pressing Tab
 * Check if every tag has a corresponding closing/opening tag
