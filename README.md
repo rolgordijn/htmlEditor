@@ -1,6 +1,7 @@
 # htmlEditor
 
 **functionality**
+
 This is code for a school assignment. It's a very basic editor for HTML. 
 
 * Add closing tag when pressing Tab
